@@ -32,6 +32,4 @@ out/
 /dist/
 /nbdist/
 /.nb-gradle/
-
-### VS Code ###
-.vscode/
+/SHIFT_Lab_Java_2b1db1e019.pdf
