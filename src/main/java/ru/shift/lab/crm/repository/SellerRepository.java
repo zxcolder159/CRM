@@ -5,7 +5,8 @@ import org.springframework.stereotype.Repository;
 import ru.shift.lab.crm.entity.Seller;
 
 /**
- * Репозиторий для работы с сущностью продавец.
+ * Репозиторий для работы с сущностью Seller (Продавец).
+ * Предоставляет методы для выполнения CRUD операций и пользовательских поисков.
  */
 @Repository
 public interface SellerRepository extends JpaRepository<Seller, Long> {
