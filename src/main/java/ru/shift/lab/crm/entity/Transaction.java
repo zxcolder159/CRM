@@ -6,9 +6,7 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-/**
- * Сущность для БД транзакция.
- */
+/** Сущность Транзакция. */
 @Entity
 @NoArgsConstructor
 @Getter
@@ -24,8 +22,6 @@ public class Transaction {
     private Seller seller;
 
     private BigDecimal amount;
-
     private String paymentType;
-
     private LocalDateTime transactionDate;
 }

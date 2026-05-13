@@ -8,9 +8,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * Сущность для БД продавец.
- */
+/** Сущность Продавец. */
 @Entity
 @NoArgsConstructor
 @Getter
