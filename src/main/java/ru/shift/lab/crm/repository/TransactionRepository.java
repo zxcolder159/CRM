@@ -8,27 +8,13 @@ import ru.shift.lab.crm.entity.Transaction;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * Репозиторий для работы с сущностью Transaction (Транзакция).
- * Предоставляет методы для выполнения CRUD операций и аналитических запросов.
- */
+/** Репозиторий Транзакции. */
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    /**
-     * Получает все транзакции конкретного продавца.
-     *
-     * @param sellerId идентификатор продавца
-     * @return список транзакций продавца
-     */
+    /** Получает все транзакции продавца по его id. */
     List<Transaction> findAllBySellerId(Long sellerId);
 
-    /**
-     * Получает идентификатор самого продуктивного продавца (с максимальной суммой) за указанный период.
-     *
-     * @param start начало периода в формате LocalDateTime
-     * @param end   конец периода в формате LocalDateTime
-     * @return список с идентификатором продавца (один элемент благодаря LIMIT 1)
-     */
+    /** Получает id самого продуктивного продавца за период. */
     @Query("SELECT t.seller.id FROM Transaction t " +
             "WHERE t.transactionDate BETWEEN :start AND :end " +
             "GROUP BY t.seller.id " +

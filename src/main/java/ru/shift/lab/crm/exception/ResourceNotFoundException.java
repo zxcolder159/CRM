@@ -1,14 +1,7 @@
 package ru.shift.lab.crm.exception;
 
-/**
- * Исключение выбрасывается когда запрашиваемый ресурс не найден в базе данных.
- */
+/** Исключение при не найденном ресурсе в БД. */
 public class ResourceNotFoundException extends RuntimeException {
-    /**
-     * Конструктор с сообщением об ошибке.
-     *
-     * @param message описание ошибки
-     */
     public ResourceNotFoundException(String message) {
         super(message);
     }
