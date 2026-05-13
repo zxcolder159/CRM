@@ -11,6 +11,10 @@ import java.time.LocalDateTime;
  */
 @Entity
 @NoArgsConstructor
+<<<<<<< entities
+=======
+@AllArgsConstructor
+>>>>>>> main
 @Getter
 @Setter
 public class Transaction {
