@@ -2,6 +2,7 @@ package ru.shift.lab.crm.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.shift.lab.crm.dto.BestPeriodResultDto;
 import ru.shift.lab.crm.entity.Seller;
 import ru.shift.lab.crm.exception.ResourceNotFoundException;
@@ -12,11 +13,13 @@ import ru.shift.lab.crm.util.PeriodType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 /** Сервис для Продавца. */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SellerService {
     private final SellerRepository sellerRepository;
     private final TransactionRepository transactionRepository;
@@ -30,12 +33,8 @@ public class SellerService {
 
     /** Возвращает продавцов с суммой ниже порога за период. */
     public List<Seller> getUnderperformingSellers(LocalDateTime start, LocalDateTime end, BigDecimal threshold) {
-        var sellersIds = transactionRepository.findSellersUnderperforming(start, end, threshold);
-        if (sellersIds.isEmpty()) {
-            throw new ResourceNotFoundException("Нет продавцов с производительностью ниже " + threshold);
-        }
-
-        return sellerRepository.findAllById(sellersIds);
+        return sellerRepository.findAllById(transactionRepository
+                .findSellersUnderperforming(start, end, threshold));
     }
 
     /** Возвращает лучший период продаж продавца и проверяет его существование. */
@@ -58,4 +57,40 @@ public class SellerService {
 
         return new BestPeriodResultDto(sellerId, bestPeriod, periodType);
     }
+
+    public List<Seller> getAllSellers() {
+        return sellerRepository.findAll();
+    }
+
+    public Seller getSellerById(Long id) {
+        return sellerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
+    }
+
+    @Transactional
+    public Seller createSeller(String name, String contactInfo) {
+        Seller seller = new Seller();
+        seller.setName(name);
+        seller.setContactInfo(contactInfo);
+        seller.setRegistrationDate(LocalDateTime.now());
+        return sellerRepository.save(seller);
+    }
+
+    @Transactional
+    public Seller updateSeller(Long id, String name, String contactInfo) {
+        Seller seller = getSellerById(id);
+        seller.setName(name);
+        seller.setContactInfo(contactInfo);
+        return sellerRepository.save(seller);
+    }
+
+    @Transactional
+    public void deleteSeller(Long id) {
+        if (!sellerRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Продавец с id " + id + " не найден");
+        }
+        sellerRepository.deleteById(id);
+    }
+
+
 }
