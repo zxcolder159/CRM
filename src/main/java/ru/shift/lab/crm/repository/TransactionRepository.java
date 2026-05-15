@@ -24,13 +24,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "ORDER BY SUM(t.amount) DESC LIMIT 1")
     Optional<Long> findTopSellerId(LocalDateTime start, LocalDateTime end);
 
-    /** Получает ids продавцов с суммой ниже порога за период. */
-    @Query("SELECT t.seller.id FROM Transaction t" +
-            " WHERE t.transactionDate BETWEEN :start AND :end" +
-            " GROUP BY t.seller.id" +
-            " HAVING SUM(t.amount) < :threshold")
-    List<Long> findSellersUnderperforming(LocalDateTime start, LocalDateTime end, BigDecimal threshold);
-
     /** Получает дату лучшего дня (максимум транзакций) для продавца. */
     @Query("SELECT CAST(t.transactionDate AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
@@ -63,6 +56,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("SELECT FUNCTION('DATE_TRUNC', 'year', t.transactionDate) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY FUNCTION('DATE_TRUNC', 'year', t.transactionDate) " +
-            "ORDER BY COUNT(t.id) DESC")
+            "ORDER BY SUM(t.id) DESC")
     Optional<LocalDate> findBestYear(Long sellerId);
 }
