@@ -3,13 +3,13 @@ package ru.shift.lab.crm.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.shift.lab.crm.dto.CreateTransactionDto;
 import ru.shift.lab.crm.dto.TransactionDto;
 import ru.shift.lab.crm.entity.Transaction;
 import ru.shift.lab.crm.exception.ResourceNotFoundException;
 import ru.shift.lab.crm.repository.SellerRepository;
 import ru.shift.lab.crm.repository.TransactionRepository;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,15 +40,15 @@ public class TransactionService {
     }
 
     /**
-     * Создает транзакцию для продавца по его id, сумме и типу оплаты.
+     * Создает транзакцию для продавца.
      */
     @Transactional
-    public TransactionDto createTransaction(Long sellerId, BigDecimal amount, String paymentType) {
-        var seller = sellerRepository.findById(sellerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + sellerId + " не найден"));
+    public TransactionDto createTransaction(CreateTransactionDto createTransactionDto) {
+        var seller = sellerRepository.findById(createTransactionDto.sellerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + createTransactionDto.sellerId() + " не найден"));
         Transaction transaction = new Transaction();
-        transaction.setAmount(amount);
-        transaction.setPaymentType(paymentType);
+        transaction.setAmount(createTransactionDto.amount());
+        transaction.setPaymentType(createTransactionDto.paymentType());
         transaction.setSeller(seller);
         transaction.setTransactionDate(LocalDateTime.now());
         Transaction saved = transactionRepository.save(transaction);

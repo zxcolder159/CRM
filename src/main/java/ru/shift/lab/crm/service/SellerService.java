@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.shift.lab.crm.dto.BestPeriodResultDto;
+import ru.shift.lab.crm.dto.CreateSellerDto;
 import ru.shift.lab.crm.dto.SellerDto;
+import ru.shift.lab.crm.dto.UpdateSellerDto;
 import ru.shift.lab.crm.entity.Seller;
 import ru.shift.lab.crm.exception.ResourceNotFoundException;
 import ru.shift.lab.crm.repository.SellerRepository;
@@ -75,21 +77,21 @@ public class SellerService {
     }
 
     @Transactional
-    public SellerDto createSeller(String name, String contactInfo) {
+    public SellerDto createSeller(CreateSellerDto createSellerDto) {
         Seller seller = new Seller();
-        seller.setName(name);
-        seller.setContactInfo(contactInfo);
+        seller.setName(createSellerDto.name());
+        seller.setContactInfo(createSellerDto.contactInfo());
         seller.setRegistrationDate(LocalDateTime.now());
         Seller saved = sellerRepository.save(seller);
         return toDto(saved);
     }
 
     @Transactional
-    public SellerDto updateSeller(Long id, String name, String contactInfo) {
+    public SellerDto updateSeller(Long id, UpdateSellerDto updateSellerDto) {
         Seller seller = sellerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
-        seller.setName(name);
-        seller.setContactInfo(contactInfo);
+        seller.setName(updateSellerDto.name());
+        seller.setContactInfo(updateSellerDto.contactInfo());
         Seller saved = sellerRepository.save(seller);
         return toDto(saved);
     }
