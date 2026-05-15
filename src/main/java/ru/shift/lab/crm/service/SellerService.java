@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.shift.lab.crm.dto.BestPeriodResultDto;
+import ru.shift.lab.crm.dto.SellerDto;
 import ru.shift.lab.crm.entity.Seller;
 import ru.shift.lab.crm.exception.ResourceNotFoundException;
 import ru.shift.lab.crm.repository.SellerRepository;
@@ -13,7 +14,6 @@ import ru.shift.lab.crm.util.PeriodType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 /** Сервис для Продавца. */
@@ -25,16 +25,20 @@ public class SellerService {
     private final TransactionRepository transactionRepository;
 
     /** Возвращает самого продуктивного продавца за указанный период. */
-    public Seller getMostProductiveSeller(LocalDateTime start, LocalDateTime end) {
-        return transactionRepository.findTopSellerId(start, end)
+    public SellerDto getMostProductiveSeller(LocalDateTime start, LocalDateTime end) {
+        Seller seller = transactionRepository.findTopSellerId(start, end)
                 .flatMap(sellerRepository::findById)
                 .orElseThrow(() -> new ResourceNotFoundException("Нет транзакций за указанный период или продавец не найден"));
+        return toDto(seller);
     }
 
     /** Возвращает продавцов с суммой ниже порога за период. */
-    public List<Seller> getUnderperformingSellers(LocalDateTime start, LocalDateTime end, BigDecimal threshold) {
-        return sellerRepository.findAllById(transactionRepository
+    public List<SellerDto> getUnderperformingSellers(LocalDateTime start, LocalDateTime end, BigDecimal threshold) {
+        List<Seller> sellers = sellerRepository.findAllById(transactionRepository
                 .findSellersUnderperforming(start, end, threshold));
+        return sellers.stream()
+                .map(this::toDto)
+                .toList();
     }
 
     /** Возвращает лучший период продаж продавца и проверяет его существование. */
@@ -58,30 +62,36 @@ public class SellerService {
         return new BestPeriodResultDto(sellerId, bestPeriod, periodType);
     }
 
-    public List<Seller> getAllSellers() {
-        return sellerRepository.findAll();
+    public List<SellerDto> getAllSellers() {
+        return sellerRepository.findAll().stream()
+                .map(this::toDto)
+                .toList();
     }
 
-    public Seller getSellerById(Long id) {
-        return sellerRepository.findById(id)
+    public SellerDto getSellerById(Long id) {
+        Seller seller = sellerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
+        return toDto(seller);
     }
 
     @Transactional
-    public Seller createSeller(String name, String contactInfo) {
+    public SellerDto createSeller(String name, String contactInfo) {
         Seller seller = new Seller();
         seller.setName(name);
         seller.setContactInfo(contactInfo);
         seller.setRegistrationDate(LocalDateTime.now());
-        return sellerRepository.save(seller);
+        Seller saved = sellerRepository.save(seller);
+        return toDto(saved);
     }
 
     @Transactional
-    public Seller updateSeller(Long id, String name, String contactInfo) {
-        Seller seller = getSellerById(id);
+    public SellerDto updateSeller(Long id, String name, String contactInfo) {
+        Seller seller = sellerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
         seller.setName(name);
         seller.setContactInfo(contactInfo);
-        return sellerRepository.save(seller);
+        Seller saved = sellerRepository.save(seller);
+        return toDto(saved);
     }
 
     @Transactional
@@ -92,5 +102,13 @@ public class SellerService {
         sellerRepository.deleteById(id);
     }
 
-
+    /** Преобразует Entity в DTO. */
+    private SellerDto toDto(Seller seller) {
+        return new SellerDto(
+                seller.getId(),
+                seller.getName(),
+                seller.getContactInfo(),
+                seller.getRegistrationDate()
+        );
+    }
 }

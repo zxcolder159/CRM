@@ -3,6 +3,7 @@ package ru.shift.lab.crm.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.shift.lab.crm.dto.TransactionDto;
 import ru.shift.lab.crm.entity.Transaction;
 import ru.shift.lab.crm.exception.ResourceNotFoundException;
 import ru.shift.lab.crm.repository.SellerRepository;
@@ -23,23 +24,26 @@ public class TransactionService {
     /**
      * Возвращает все транзакции.
      */
-    public List<Transaction> getAllTransaction() {
-        return transactionRepository.findAll();
+    public List<TransactionDto> getAllTransaction() {
+        return transactionRepository.findAll().stream()
+                .map(this::toDto)
+                .toList();
     }
 
     /**
      * Возвращает транзакцию по id.
      */
-    public Transaction getTransactionById(Long id) {
-        return transactionRepository.findById(id)
+    public TransactionDto getTransactionById(Long id) {
+        Transaction transaction = transactionRepository.findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Транзакции с id " + id + " не найдено"));
+        return toDto(transaction);
     }
 
     /**
      * Создает транзакцию для продавца по его id, сумме и типу оплаты.
      */
     @Transactional
-    public Transaction createTransaction(Long sellerId, BigDecimal amount, String paymentType) {
+    public TransactionDto createTransaction(Long sellerId, BigDecimal amount, String paymentType) {
         var seller = sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + sellerId + " не найден"));
         Transaction transaction = new Transaction();
@@ -47,16 +51,30 @@ public class TransactionService {
         transaction.setPaymentType(paymentType);
         transaction.setSeller(seller);
         transaction.setTransactionDate(LocalDateTime.now());
-        return transactionRepository.save(transaction);
+        Transaction saved = transactionRepository.save(transaction);
+        return toDto(saved);
     }
 
     /**
      * Возвращает все транзакции продавца по его id.
      */
-    public List<Transaction> getAllTransactionsBySellerId(Long id) {
+    public List<TransactionDto> getAllTransactionsBySellerId(Long id) {
         if (!sellerRepository.existsById(id)) {
             throw new ResourceNotFoundException("Продавец с id " + id + " не найден");
         }
-        return transactionRepository.findAllBySellerId(id);
+        return transactionRepository.findAllBySellerId(id).stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    /** Преобразует Entity в DTO. */
+    private TransactionDto toDto(Transaction transaction) {
+        return new TransactionDto(
+                transaction.getId(),
+                transaction.getSeller().getId(),
+                transaction.getAmount(),
+                transaction.getPaymentType(),
+                transaction.getTransactionDate()
+        );
     }
 }
