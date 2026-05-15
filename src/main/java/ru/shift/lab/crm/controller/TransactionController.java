@@ -7,6 +7,7 @@ import ru.shift.lab.crm.dto.CreateTransactionDto;
 import ru.shift.lab.crm.dto.TransactionDto;
 import ru.shift.lab.crm.service.TransactionService;
 
+import jakarta.validation.Valid;
 import java.util.List;
 
 /** REST контроллер для управления транзакциями. */
@@ -19,7 +20,7 @@ public class TransactionController {
     /** Создать новую транзакцию. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TransactionDto createTransaction(@RequestBody CreateTransactionDto createTransactionDto) {
+    public TransactionDto createTransaction(@Valid @RequestBody CreateTransactionDto createTransactionDto) {
         return transactionService.createTransaction(createTransactionDto);
     }
 

@@ -10,6 +10,7 @@ import ru.shift.lab.crm.dto.SellerDto;
 import ru.shift.lab.crm.dto.UpdateSellerDto;
 import ru.shift.lab.crm.service.SellerService;
 
+import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +50,7 @@ public class SellerController {
     /** Создать нового продавца. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public SellerDto createSeller(@RequestBody CreateSellerDto createSellerDto) {
+    public SellerDto createSeller(@Valid @RequestBody CreateSellerDto createSellerDto) {
         return sellerService.createSeller(createSellerDto);
     }
 
@@ -61,7 +62,7 @@ public class SellerController {
 
     /** Обновить информацию о продавце. */
     @PutMapping("/{id}")
-    public SellerDto updateSeller(@PathVariable Long id, @RequestBody UpdateSellerDto updateSellerDto) {
+    public SellerDto updateSeller(@PathVariable Long id, @Valid @RequestBody UpdateSellerDto updateSellerDto) {
         return sellerService.updateSeller(id, updateSellerDto);
     }
 
