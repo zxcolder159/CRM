@@ -99,9 +99,6 @@ public class SellerService {
 
     @Transactional
     public void deleteSeller(Long id) {
-        if (!sellerRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Продавец с id " + id + " не найден");
-        }
         Seller seller = sellerRepository.findById(id)
                         .orElseThrow(()-> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
         seller.setDeleted(true);
