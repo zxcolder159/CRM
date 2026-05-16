@@ -2,6 +2,7 @@ package ru.shift.lab.crm.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.shift.lab.crm.util.PaymentType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -22,6 +23,9 @@ public class Transaction {
     private Seller seller;
 
     private BigDecimal amount;
-    private String paymentType;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType;
+
     private LocalDateTime transactionDate;
 }

@@ -16,6 +16,7 @@ import ru.shift.lab.crm.util.PeriodType;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 /** Сервис для Продавца. */
@@ -27,17 +28,18 @@ public class SellerService {
     private final TransactionRepository transactionRepository;
 
     /** Возвращает самого продуктивного продавца за указанный период. */
-    public SellerDto getMostProductiveSeller(LocalDateTime start, LocalDateTime end) {
-        Seller seller = transactionRepository.findTopSellerId(start, end)
+    public SellerDto getMostProductiveSeller(LocalDateTime startDate, PeriodType periodType) {
+        LocalDateTime endDate = calculatePeriodEndDate(startDate, periodType);
+        Seller seller = transactionRepository.findTopSellerId(startDate, endDate)
                 .flatMap(sellerRepository::findById)
                 .orElseThrow(() -> new ResourceNotFoundException("Нет транзакций за указанный период или продавец не найден"));
         return toDto(seller);
     }
 
     /** Возвращает продавцов с суммой ниже порога за период. */
-    public List<SellerDto> getUnderperformingSellers(LocalDateTime start, LocalDateTime end, BigDecimal threshold) {
-        List<Seller> sellers = sellerRepository.findAllById(transactionRepository
-                .findSellersUnderperforming(start, end, threshold));
+    public List<SellerDto> getUnderperformingSellers(LocalDateTime startDate, PeriodType periodType, BigDecimal threshold) {
+        LocalDateTime endDate = calculatePeriodEndDate(startDate, periodType);
+        List<Seller> sellers = sellerRepository.findUnderperformingSellers(startDate, endDate, threshold);
         return sellers.stream()
                 .map(this::toDto)
                 .toList();
@@ -92,16 +94,14 @@ public class SellerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
         seller.setName(updateSellerDto.name());
         seller.setContactInfo(updateSellerDto.contactInfo());
-        Seller saved = sellerRepository.save(seller);
-        return toDto(saved);
+        return toDto(seller);
     }
 
     @Transactional
     public void deleteSeller(Long id) {
-        if (!sellerRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Продавец с id " + id + " не найден");
-        }
-        sellerRepository.deleteById(id);
+        Seller seller = sellerRepository.findById(id)
+                        .orElseThrow(()-> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
+        seller.setDeleted(true);
     }
 
     /** Преобразует Entity в DTO. */
@@ -112,5 +112,18 @@ public class SellerService {
                 seller.getContactInfo(),
                 seller.getRegistrationDate()
         );
+    }
+
+    /** Вычисляет дату конца периода на основе стартовой даты и типа периода. */
+    private LocalDateTime calculatePeriodEndDate(LocalDateTime startDate, PeriodType periodType) {
+        LocalDate startDateOnly = startDate.toLocalDate();
+        LocalDate endDate = switch (periodType) {
+            case DAY -> startDateOnly;
+            case WEEK -> startDateOnly.plusDays(6);
+            case MONTH -> startDateOnly.plusMonths(1).minusDays(1);
+            case QUARTER -> startDateOnly.plusMonths(3).minusDays(1);
+            case YEAR -> startDateOnly.plusYears(1).minusDays(1);
+        };
+        return LocalDateTime.of(endDate, LocalTime.MAX);
     }
 }

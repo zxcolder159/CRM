@@ -1,5 +1,7 @@
 package ru.shift.lab.crm.dto;
 
+import ru.shift.lab.crm.util.PaymentType;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -8,8 +10,7 @@ public record TransactionDto(
         Long id,
         Long sellerId,
         BigDecimal amount,
-        String paymentType,
+        PaymentType paymentType,
         LocalDateTime transactionDate
 ) {
 }
-

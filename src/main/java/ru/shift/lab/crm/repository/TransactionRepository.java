@@ -24,45 +24,35 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "ORDER BY SUM(t.amount) DESC LIMIT 1")
     Optional<Long> findTopSellerId(LocalDateTime start, LocalDateTime end);
 
-    /** Получает ids продавцов с суммой ниже порога за период. */
-    @Query("SELECT t.seller.id FROM Transaction t" +
-            " WHERE t.transactionDate BETWEEN :start AND :end" +
-            " GROUP BY t.seller.id" +
-            " HAVING SUM(t.amount) < :threshold")
-    List<Long> findSellersUnderperforming(LocalDateTime start, LocalDateTime end, BigDecimal threshold);
-
     /** Получает дату лучшего дня (максимум транзакций) для продавца. */
     @Query("SELECT CAST(t.transactionDate AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY CAST(t.transactionDate AS DATE) " +
-            "ORDER BY COUNT(t.id) DESC")
+            "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestDay(Long sellerId);
 
     /** Получает дату начала лучшей недели (максимум транзакций) для продавца. */
-    @Query("SELECT FUNCTION('DATE_TRUNC', 'week', t.transactionDate) FROM Transaction t " +
+    @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'week', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY FUNCTION('DATE_TRUNC', 'week', t.transactionDate) " +
-            "ORDER BY COUNT(t.id) DESC")
+            "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestWeek(Long sellerId);
 
-    /** Получает дату начала лучшего месяца (максимум транзакций) для продавца. */
-    @Query("SELECT FUNCTION('DATE_TRUNC', 'month', t.transactionDate) FROM Transaction t " +
+    @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'month', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY FUNCTION('DATE_TRUNC', 'month', t.transactionDate) " +
-            "ORDER BY COUNT(t.id) DESC")
+            "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestMonth(Long sellerId);
 
-    /** Получает дату начала лучшего квартала (максимум транзакций) для продавца. */
-    @Query("SELECT FUNCTION('DATE_TRUNC', 'quarter', t.transactionDate) FROM Transaction t " +
+    @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'quarter', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY FUNCTION('DATE_TRUNC', 'quarter', t.transactionDate) " +
-            "ORDER BY COUNT(t.id) DESC")
+            "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestQuarter(Long sellerId);
 
-    /** Получает дату начала лучшего года (максимум транзакций) для продавца. */
-    @Query("SELECT FUNCTION('DATE_TRUNC', 'year', t.transactionDate) FROM Transaction t " +
+    @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'year', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY FUNCTION('DATE_TRUNC', 'year', t.transactionDate) " +
-            "ORDER BY COUNT(t.id) DESC")
+            "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestYear(Long sellerId);
 }
