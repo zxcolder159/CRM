@@ -17,9 +17,11 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     /** Получает все транзакции продавца по его id. */
     List<Transaction> findAllBySellerId(Long sellerId);
 
-    /** Получает id самого продуктивного продавца за период. */
+    /** Получает id самого продуктивного продавца за период (исключает удалённых продавцов). */
     @Query("SELECT t.seller.id FROM Transaction t " +
+            "JOIN t.seller s " +
             "WHERE t.transactionDate BETWEEN :start AND :end " +
+            "AND s.isDeleted = false " +
             "GROUP BY t.seller.id " +
             "ORDER BY SUM(t.amount) DESC LIMIT 1")
     Optional<Long> findTopSellerId(LocalDateTime start, LocalDateTime end);

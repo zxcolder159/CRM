@@ -50,7 +50,7 @@ public class SellerService {
         sellerRepository.findById(sellerId)
                 .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + sellerId + " не найден"));
 
-        LocalDate bestPeriod = switch (periodType) {
+        LocalDate periodStart = switch (periodType) {
             case DAY -> transactionRepository.findBestDay(sellerId)
                     .orElseThrow(() -> new ResourceNotFoundException("Нет транзакций для дня"));
             case WEEK -> transactionRepository.findBestWeek(sellerId)
@@ -63,7 +63,8 @@ public class SellerService {
                     .orElseThrow(() -> new ResourceNotFoundException("Нет транзакций для года"));
         };
 
-        return new BestPeriodResultDto(sellerId, bestPeriod, periodType);
+        LocalDate periodEnd = calculatePeriodEndDate(LocalDateTime.of(periodStart, LocalTime.MIDNIGHT), periodType).toLocalDate();
+        return new BestPeriodResultDto(sellerId, periodStart, periodEnd, periodType);
     }
 
     public List<SellerDto> getAllSellers() {

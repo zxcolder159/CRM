@@ -8,6 +8,7 @@ import java.time.LocalDate;
 public record BestPeriodResultDto(
         Long sellerId,
         LocalDate periodStart,
+        LocalDate periodEnd,
         PeriodType periodType
 ) {
 }
