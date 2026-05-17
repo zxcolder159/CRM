@@ -95,6 +95,7 @@ public class SellerService {
                 .orElseThrow(() -> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
         seller.setName(updateSellerDto.name());
         seller.setContactInfo(updateSellerDto.contactInfo());
+        sellerRepository.save(seller);
         return toDto(seller);
     }
 
