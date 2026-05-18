@@ -15,6 +15,9 @@ import ru.shift.lab.crm.service.SellerService;
 import ru.shift.lab.crm.util.PeriodType;
 import tools.jackson.databind.ObjectMapper;
 
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,23 +52,24 @@ class SellerControllerTest {
     }
 
     @Test
-    void getAllSellers_returns200WithList() throws Exception {
-        when(sellerService.getAllSellers()).thenReturn(List.of(sellerDto(1L, "Alice"), sellerDto(2L, "Bob")));
+    void getAllSellers_returns200WithPage() throws Exception {
+        when(sellerService.getAllSellers(any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(sellerDto(1L, "Alice"), sellerDto(2L, "Bob"))));
 
         mockMvc.perform(get("/api/sellers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].name").value("Alice"))
-                .andExpect(jsonPath("$[1].name").value("Bob"));
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].name").value("Alice"))
+                .andExpect(jsonPath("$.content[1].name").value("Bob"));
     }
 
     @Test
-    void getAllSellers_emptyList_returns200WithEmptyArray() throws Exception {
-        when(sellerService.getAllSellers()).thenReturn(List.of());
+    void getAllSellers_emptyList_returns200WithEmptyPage() throws Exception {
+        when(sellerService.getAllSellers(any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/api/sellers"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(0));
     }
 
     @Test

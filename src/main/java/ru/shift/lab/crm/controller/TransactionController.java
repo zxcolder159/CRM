@@ -9,6 +9,9 @@ import ru.shift.lab.crm.dto.CreateTransactionDto;
 import ru.shift.lab.crm.dto.TransactionDto;
 import ru.shift.lab.crm.service.TransactionService;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import jakarta.validation.Valid;
 import java.util.List;
 
@@ -34,8 +37,8 @@ public class TransactionController {
 
     /** Получить список всех транзакций. */
     @GetMapping
-    public List<TransactionDto> getAllTransactions() {
-        return transactionService.getAllTransaction();
+    public Page<TransactionDto> getAllTransactions(Pageable pageable) {
+        return transactionService.getAllTransaction(pageable);
     }
 
     @ApiResponse(responseCode = "404", description = "Транзакция не найдена")

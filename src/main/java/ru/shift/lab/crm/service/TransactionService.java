@@ -10,6 +10,9 @@ import ru.shift.lab.crm.exception.ResourceNotFoundException;
 import ru.shift.lab.crm.repository.SellerRepository;
 import ru.shift.lab.crm.repository.TransactionRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,10 +27,8 @@ public class TransactionService {
     /**
      * Возвращает все транзакции.
      */
-    public List<TransactionDto> getAllTransaction() {
-        return transactionRepository.findAll().stream()
-                .map(this::toDto)
-                .toList();
+    public Page<TransactionDto> getAllTransaction(Pageable pageable) {
+        return transactionRepository.findAll(pageable).map(this::toDto);
     }
 
     /**

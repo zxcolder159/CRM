@@ -13,6 +13,9 @@ import ru.shift.lab.crm.repository.SellerRepository;
 import ru.shift.lab.crm.repository.TransactionRepository;
 import ru.shift.lab.crm.util.PeriodType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -71,10 +74,8 @@ public class SellerService {
         return new BestPeriodResultDto(sellerId, periodStart, periodEnd, periodType);
     }
 
-    public List<SellerDto> getAllSellers() {
-        return sellerRepository.findAll().stream()
-                .map(this::toDto)
-                .toList();
+    public Page<SellerDto> getAllSellers(Pageable pageable) {
+        return sellerRepository.findAll(pageable).map(this::toDto);
     }
 
     public SellerDto getSellerById(Long id) {
