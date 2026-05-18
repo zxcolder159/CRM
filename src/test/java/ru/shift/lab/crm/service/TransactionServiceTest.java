@@ -16,6 +16,11 @@ import ru.shift.lab.crm.repository.SellerRepository;
 import ru.shift.lab.crm.repository.TransactionRepository;
 import ru.shift.lab.crm.util.PaymentType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,25 +64,27 @@ class TransactionServiceTest {
     @Test
     void getAllTransaction_returnsMappedDtos() {
         Seller s = seller(1L);
-        when(transactionRepository.findAll()).thenReturn(List.of(
+        Pageable pageable = PageRequest.of(0, 20);
+        when(transactionRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(
                 transaction(1L, s, BigDecimal.valueOf(100), PaymentType.CASH),
                 transaction(2L, s, BigDecimal.valueOf(200), PaymentType.CARD)
-        ));
+        )));
 
-        List<TransactionDto> result = transactionService.getAllTransaction();
+        Page<TransactionDto> result = transactionService.getAllTransaction(pageable);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).amount()).isEqualByComparingTo(BigDecimal.valueOf(100));
-        assertThat(result.get(0).paymentType()).isEqualTo(PaymentType.CASH);
-        assertThat(result.get(1).amount()).isEqualByComparingTo(BigDecimal.valueOf(200));
-        assertThat(result.get(1).paymentType()).isEqualTo(PaymentType.CARD);
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).amount()).isEqualByComparingTo(BigDecimal.valueOf(100));
+        assertThat(result.getContent().get(0).paymentType()).isEqualTo(PaymentType.CASH);
+        assertThat(result.getContent().get(1).amount()).isEqualByComparingTo(BigDecimal.valueOf(200));
+        assertThat(result.getContent().get(1).paymentType()).isEqualTo(PaymentType.CARD);
     }
 
     @Test
-    void getAllTransaction_emptyRepository_returnsEmptyList() {
-        when(transactionRepository.findAll()).thenReturn(List.of());
+    void getAllTransaction_emptyRepository_returnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(transactionRepository.findAll(pageable)).thenReturn(Page.empty());
 
-        assertThat(transactionService.getAllTransaction()).isEmpty();
+        assertThat(transactionService.getAllTransaction(pageable).getContent()).isEmpty();
     }
 
     @Test

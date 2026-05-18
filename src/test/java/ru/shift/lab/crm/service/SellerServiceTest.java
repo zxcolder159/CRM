@@ -10,6 +10,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 import ru.shift.lab.crm.dto.BestPeriodResultDto;
 import ru.shift.lab.crm.dto.CreateSellerDto;
@@ -55,20 +59,22 @@ class SellerServiceTest {
 
     @Test
     void getAllSellers_returnsMappedDtos() {
-        when(sellerRepository.findAll()).thenReturn(List.of(seller(1L, "Alice"), seller(2L, "Bob")));
+        Pageable pageable = PageRequest.of(0, 20);
+        when(sellerRepository.findAll(pageable)).thenReturn(new PageImpl<>(List.of(seller(1L, "Alice"), seller(2L, "Bob"))));
 
-        List<SellerDto> result = sellerService.getAllSellers();
+        Page<SellerDto> result = sellerService.getAllSellers(pageable);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).name()).isEqualTo("Alice");
-        assertThat(result.get(1).name()).isEqualTo("Bob");
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).name()).isEqualTo("Alice");
+        assertThat(result.getContent().get(1).name()).isEqualTo("Bob");
     }
 
     @Test
-    void getAllSellers_emptyRepository_returnsEmptyList() {
-        when(sellerRepository.findAll()).thenReturn(List.of());
+    void getAllSellers_emptyRepository_returnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(sellerRepository.findAll(pageable)).thenReturn(Page.empty());
 
-        assertThat(sellerService.getAllSellers()).isEmpty();
+        assertThat(sellerService.getAllSellers(pageable).getContent()).isEmpty();
     }
 
     @Test

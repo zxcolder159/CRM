@@ -16,6 +16,9 @@ import ru.shift.lab.crm.dto.UpdateSellerDto;
 import ru.shift.lab.crm.service.SellerService;
 import ru.shift.lab.crm.util.PeriodType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,8 +33,8 @@ public class SellerController {
 
     /** Получить список всех продавцов. */
     @GetMapping
-    public List<SellerDto> getAllSellers() {
-        return sellerService.getAllSellers();
+    public Page<SellerDto> getAllSellers(Pageable pageable) {
+        return sellerService.getAllSellers(pageable);
     }
 
     @Operation(summary = "Самый продуктивный продавец за период",
