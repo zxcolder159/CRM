@@ -36,25 +36,25 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     /** Получает дату начала лучшей недели (максимум транзакций) для продавца. */
     @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'week', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
-            "GROUP BY FUNCTION('DATE_TRUNC', 'week', t.transactionDate) " +
+            "GROUP BY CAST(FUNCTION('DATE_TRUNC', 'week', t.transactionDate) AS DATE) " +
             "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestWeek(Long sellerId);
 
     @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'month', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
-            "GROUP BY FUNCTION('DATE_TRUNC', 'month', t.transactionDate) " +
+            "GROUP BY CAST(FUNCTION('DATE_TRUNC', 'month', t.transactionDate) AS DATE) " +
             "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestMonth(Long sellerId);
 
     @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'quarter', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
-            "GROUP BY FUNCTION('DATE_TRUNC', 'quarter', t.transactionDate) " +
+            "GROUP BY CAST(FUNCTION('DATE_TRUNC', 'quarter', t.transactionDate) AS DATE) " +
             "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestQuarter(Long sellerId);
 
     @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'year', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
-            "GROUP BY FUNCTION('DATE_TRUNC', 'year', t.transactionDate) " +
+            "GROUP BY CAST(FUNCTION('DATE_TRUNC', 'year', t.transactionDate) AS DATE) " +
             "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestYear(Long sellerId);
 }
