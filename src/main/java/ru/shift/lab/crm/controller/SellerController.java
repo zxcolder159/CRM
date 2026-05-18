@@ -1,6 +1,10 @@
 package ru.shift.lab.crm.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -17,7 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/** REST контроллер для управления продавцами. */
+@Tag(name = "Sellers")
 @RestController
 @RequestMapping("/api/sellers")
 @RequiredArgsConstructor
@@ -30,24 +34,28 @@ public class SellerController {
         return sellerService.getAllSellers();
     }
 
-    /** Получить самого продуктивного продавца за указанный период. */
+    @Operation(summary = "Самый продуктивный продавец за период",
+            description = "Период: [startDate, startDate + periodType]. Считается по сумме транзакций.")
     @GetMapping("/most-productive")
-    public SellerDto getMostProductive(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                           LocalDateTime startDate,
-                                       @RequestParam PeriodType periodType) {
+    public SellerDto getMostProductive(
+            @Parameter(description = "Начало периода") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @Parameter(description = "Длина периода: DAY, WEEK, MONTH, QUARTER, YEAR") @RequestParam PeriodType periodType) {
         return sellerService.getMostProductiveSeller(startDate, periodType);
     }
 
-    /** Получить список продавцов с суммой транзакций ниже указанного порога за период. */
+    @Operation(summary = "Продавцы ниже порога",
+            description = "Возвращает продавцов, чья сумма транзакций за период строго меньше threshold. Продавцы без транзакций включаются.")
     @GetMapping("/underperforming")
-    public List<SellerDto> getUnderperformingSellers(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                        LocalDateTime startDate,
-                                                    @RequestParam PeriodType periodType,
-                                                    @RequestParam BigDecimal threshold) {
+    public List<SellerDto> getUnderperformingSellers(
+            @Parameter(description = "Начало периода") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
+            @Parameter(description = "Длина периода: DAY, WEEK, MONTH, QUARTER, YEAR") @RequestParam PeriodType periodType,
+            @Parameter(description = "Порог суммы транзакций за период") @RequestParam BigDecimal threshold) {
         return sellerService.getUnderperformingSellers(startDate, periodType, threshold);
     }
 
-    /** Получить лучший период продаж продавца по его ID. */
+    @Operation(summary = "Лучший период продаж продавца",
+            description = "Возвращает период с наибольшим количеством транзакций. periodStart — начало периода по ISO (неделя с понедельника, квартал с 1-го числа).")
+    @ApiResponse(responseCode = "404", description = "Продавец не найден")
     @GetMapping("/{id}/best-period")
     public BestPeriodResultDto getBestPeriod(@PathVariable Long id, @RequestParam PeriodType periodType) {
         return sellerService.getBestSalesPeriod(id, periodType);
@@ -60,7 +68,7 @@ public class SellerController {
         return sellerService.createSeller(createSellerDto);
     }
 
-    /** Получить информацию о продавце по ID. */
+    @ApiResponse(responseCode = "404", description = "Продавец не найден")
     @GetMapping("/{id}")
     public SellerDto getSellerById(@PathVariable Long id) {
         return sellerService.getSellerById(id);
@@ -72,7 +80,8 @@ public class SellerController {
         return sellerService.updateSeller(id, updateSellerDto);
     }
 
-    /** Удалить продавца. */
+    @Operation(summary = "Удалить продавца", description = "Мягкое удаление: устанавливает isDeleted=true, запись остаётся в БД.")
+    @ApiResponse(responseCode = "404", description = "Продавец не найден")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSeller(@PathVariable Long id) {
