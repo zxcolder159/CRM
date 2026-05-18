@@ -33,3 +33,4 @@ out/
 /nbdist/
 /.nb-gradle/
 /SHIFT_Lab_Java_2b1db1e019.pdf
+.env
