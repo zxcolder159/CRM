@@ -158,15 +158,18 @@ class SellerServiceTest {
 
     @ParameterizedTest
     @MethodSource("providePeriodsForMostProductive")
-    void getMostProductiveSeller_returnsDtoAndVerifiesEndDate(PeriodType periodType, LocalDate expectedEndDate) {
+    void getMostProductiveSeller_returnsDtoAndVerifiesEndDate(PeriodType periodType, LocalDate expectedStartDate, LocalDate expectedEndDate) {
         LocalDateTime start = LocalDateTime.of(2026, 1, 1, 0, 0);
         when(transactionRepository.findTopSellerId(any(), any())).thenReturn(Optional.of(1L));
         lenient().when(sellerRepository.findById(1L)).thenReturn(Optional.of(seller(1L, "Alice")));
 
         SellerDto result = sellerService.getMostProductiveSeller(start, periodType);
 
+        ArgumentCaptor<LocalDateTime> startCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
         ArgumentCaptor<LocalDateTime> endCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
-        verify(transactionRepository).findTopSellerId(eq(start), endCaptor.capture());
+        verify(transactionRepository).findTopSellerId(startCaptor.capture(), endCaptor.capture());
+        assertThat(startCaptor.getValue().toLocalDate()).isEqualTo(expectedStartDate);
+        assertThat(startCaptor.getValue().toLocalTime()).isEqualTo(LocalTime.MIDNIGHT);
         assertThat(endCaptor.getValue().toLocalDate()).isEqualTo(expectedEndDate);
         assertThat(endCaptor.getValue().toLocalTime()).isEqualTo(LocalTime.MAX);
         
@@ -176,11 +179,11 @@ class SellerServiceTest {
 
     private static Stream<Arguments> providePeriodsForMostProductive() {
         return Stream.of(
-                Arguments.of(PeriodType.DAY, LocalDate.of(2026, 1, 1)),
-                Arguments.of(PeriodType.WEEK, LocalDate.of(2026, 1, 7)),
-                Arguments.of(PeriodType.MONTH, LocalDate.of(2026, 1, 31)),
-                Arguments.of(PeriodType.QUARTER, LocalDate.of(2026, 3, 31)),
-                Arguments.of(PeriodType.YEAR, LocalDate.of(2026, 12, 31))
+                Arguments.of(PeriodType.DAY, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 1)),
+                Arguments.of(PeriodType.WEEK, LocalDate.of(2025, 12, 29), LocalDate.of(2026, 1, 4)),
+                Arguments.of(PeriodType.MONTH, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31)),
+                Arguments.of(PeriodType.QUARTER, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 3, 31)),
+                Arguments.of(PeriodType.YEAR, LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31))
         );
     }
 
