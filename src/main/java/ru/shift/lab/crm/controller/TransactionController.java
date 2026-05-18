@@ -1,5 +1,7 @@
 package ru.shift.lab.crm.controller;
 
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +12,7 @@ import ru.shift.lab.crm.service.TransactionService;
 import jakarta.validation.Valid;
 import java.util.List;
 
-/** REST контроллер для управления транзакциями. */
+@Tag(name = "Transactions")
 @RestController
 @RequestMapping("/api/transactions")
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class TransactionController {
         return transactionService.getAllTransaction();
     }
 
-    /** Получить информацию о транзакции по ID. */
+    @ApiResponse(responseCode = "404", description = "Транзакция не найдена")
     @GetMapping("/{id}")
     public TransactionDto getTransactionById(@PathVariable Long id) {
         return transactionService.getTransactionById(id);
