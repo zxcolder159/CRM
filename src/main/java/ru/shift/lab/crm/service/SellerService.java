@@ -31,8 +31,9 @@ public class SellerService {
 
     /** Возвращает самого продуктивного продавца за указанный период. */
     public SellerDto getMostProductiveSeller(LocalDateTime startDate, PeriodType periodType) {
+        LocalDateTime normalizedStart = calculatePeriodStartDate(startDate, periodType);
         LocalDateTime endDate = calculatePeriodEndDate(startDate, periodType);
-        Seller seller = transactionRepository.findTopSellerId(startDate, endDate)
+        Seller seller = transactionRepository.findTopSellerId(normalizedStart, endDate)
                 .flatMap(sellerRepository::findById)
                 .orElseThrow(() -> new ResourceNotFoundException("Нет транзакций за указанный период или продавец не найден"));
         return toDto(seller);
@@ -40,8 +41,9 @@ public class SellerService {
 
     /** Возвращает продавцов с суммой ниже порога за период. */
     public List<SellerDto> getUnderperformingSellers(LocalDateTime startDate, PeriodType periodType, BigDecimal threshold) {
+        LocalDateTime normalizedStart = calculatePeriodStartDate(startDate, periodType);
         LocalDateTime endDate = calculatePeriodEndDate(startDate, periodType);
-        List<Seller> sellers = sellerRepository.findUnderperformingSellers(startDate, endDate, threshold);
+        List<Seller> sellers = sellerRepository.findUnderperformingSellers(normalizedStart, endDate, threshold);
         return sellers.stream()
                 .map(this::toDto)
                 .toList();
@@ -106,6 +108,7 @@ public class SellerService {
         Seller seller = sellerRepository.findById(id)
                         .orElseThrow(()-> new ResourceNotFoundException("Продавец с id " + id + " не найден"));
         seller.setDeleted(true);
+        sellerRepository.save(seller);
     }
 
     /** Преобразует Entity в DTO. */
@@ -131,5 +134,20 @@ public class SellerService {
             case YEAR -> startDateOnly.with(TemporalAdjusters.lastDayOfYear());
         };
         return LocalDateTime.of(endDate, LocalTime.MAX);
+    }
+
+    /** Вычисляет дату начала периода на основе переданной даты и типа периода. */
+    private LocalDateTime calculatePeriodStartDate(LocalDateTime date, PeriodType periodType) {
+        LocalDate dateOnly = date.toLocalDate();
+        LocalDate startDate = switch (periodType) {
+            case DAY -> dateOnly;
+            case WEEK -> dateOnly.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            case MONTH -> dateOnly.with(TemporalAdjusters.firstDayOfMonth());
+            case QUARTER -> dateOnly
+                    .withMonth(((dateOnly.getMonthValue() - 1) / 3) * 3 + 1)
+                    .with(TemporalAdjusters.firstDayOfMonth());
+            case YEAR -> dateOnly.with(TemporalAdjusters.firstDayOfYear());
+        };
+        return LocalDateTime.of(startDate, LocalTime.MIDNIGHT);
     }
 }
