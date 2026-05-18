@@ -14,9 +14,11 @@ import ru.shift.lab.crm.repository.TransactionRepository;
 import ru.shift.lab.crm.util.PeriodType;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 /** Сервис для Продавца. */
@@ -121,10 +123,12 @@ public class SellerService {
         LocalDate startDateOnly = startDate.toLocalDate();
         LocalDate endDate = switch (periodType) {
             case DAY -> startDateOnly;
-            case WEEK -> startDateOnly.plusDays(6);
-            case MONTH -> startDateOnly.plusMonths(1).minusDays(1);
-            case QUARTER -> startDateOnly.plusMonths(3).minusDays(1);
-            case YEAR -> startDateOnly.plusYears(1).minusDays(1);
+            case WEEK -> startDateOnly.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+            case MONTH -> startDateOnly.with(TemporalAdjusters.lastDayOfMonth());
+            case QUARTER -> startDateOnly
+                    .withMonth(((startDateOnly.getMonthValue() - 1) / 3 + 1) * 3)
+                    .with(TemporalAdjusters.lastDayOfMonth());
+            case YEAR -> startDateOnly.with(TemporalAdjusters.lastDayOfYear());
         };
         return LocalDateTime.of(endDate, LocalTime.MAX);
     }
