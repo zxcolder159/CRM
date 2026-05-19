@@ -9,10 +9,12 @@ import ru.shift.lab.crm.entity.Seller;
 import ru.shift.lab.crm.entity.Transaction;
 import ru.shift.lab.crm.util.PaymentType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -56,19 +58,19 @@ class TransactionRepositoryTest {
         addTransaction(alice, BigDecimal.valueOf(200), START.plusDays(1));
         addTransaction(bob, BigDecimal.valueOf(300), START);
 
-        List<Transaction> result = transactionRepository.findAllBySellerId(alice.getId());
+        Page<Transaction> result = transactionRepository.findAllBySellerId(alice.getId(), Pageable.unpaged());
 
-        assertThat(result).hasSize(2);
-        assertThat(result).allMatch(t -> t.getSeller().getId().equals(alice.getId()));
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).allMatch(t -> t.getSeller().getId().equals(alice.getId()));
     }
 
     @Test
     void findAllBySellerId_noTransactions_returnsEmpty() {
         Seller alice = persistSeller("Alice", false);
 
-        List<Transaction> result = transactionRepository.findAllBySellerId(alice.getId());
+        Page<Transaction> result = transactionRepository.findAllBySellerId(alice.getId(), Pageable.unpaged());
 
-        assertThat(result).isEmpty();
+        assertThat(result.getContent()).isEmpty();
     }
 
     @Test

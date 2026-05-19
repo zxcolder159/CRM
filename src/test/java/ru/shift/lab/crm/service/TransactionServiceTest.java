@@ -147,36 +147,39 @@ class TransactionServiceTest {
     }
 
     @Test
-    void getAllTransactionsBySellerId_sellerExists_returnsMappedDtos() {
+    void getAllTransactionsBySellerId_sellerExists_returnsMappedPage() {
         Seller s = seller(1L);
+        Pageable pageable = PageRequest.of(0, 20);
         when(sellerRepository.existsById(1L)).thenReturn(true);
-        when(transactionRepository.findAllBySellerId(1L)).thenReturn(List.of(
+        when(transactionRepository.findAllBySellerId(1L, pageable)).thenReturn(new PageImpl<>(List.of(
                 transaction(1L, s, BigDecimal.valueOf(100), PaymentType.CASH)
-        ));
+        )));
 
-        List<TransactionDto> result = transactionService.getAllTransactionsBySellerId(1L);
+        Page<TransactionDto> result = transactionService.getAllTransactionsBySellerId(1L, pageable);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).sellerId()).isEqualTo(1L);
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).sellerId()).isEqualTo(1L);
     }
 
     @Test
-    void getAllTransactionsBySellerId_sellerWithNoTransactions_returnsEmptyList() {
+    void getAllTransactionsBySellerId_sellerWithNoTransactions_returnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 20);
         when(sellerRepository.existsById(1L)).thenReturn(true);
-        when(transactionRepository.findAllBySellerId(1L)).thenReturn(List.of());
+        when(transactionRepository.findAllBySellerId(1L, pageable)).thenReturn(new PageImpl<>(List.of()));
 
-        assertThat(transactionService.getAllTransactionsBySellerId(1L)).isEmpty();
+        assertThat(transactionService.getAllTransactionsBySellerId(1L, pageable).getContent()).isEmpty();
     }
 
     @Test
     void getAllTransactionsBySellerId_sellerNotFound_throws() {
+        Pageable pageable = PageRequest.of(0, 20);
         when(sellerRepository.existsById(99L)).thenReturn(false);
 
-        assertThatThrownBy(() -> transactionService.getAllTransactionsBySellerId(99L))
+        assertThatThrownBy(() -> transactionService.getAllTransactionsBySellerId(99L, pageable))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("99");
 
-        verify(transactionRepository, never()).findAllBySellerId(any());
+        verify(transactionRepository, never()).findAllBySellerId(any(), any());
     }
 
 }

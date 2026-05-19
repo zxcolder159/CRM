@@ -1,23 +1,21 @@
 package ru.shift.lab.crm.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.shift.lab.crm.entity.Transaction;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
-/** Репозиторий Транзакции. */
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    /** Получает все транзакции продавца по его id. */
-    List<Transaction> findAllBySellerId(Long sellerId);
 
-    /** Получает id самого продуктивного продавца за период (исключает удалённых продавцов). */
+    Page<Transaction> findAllBySellerId(Long sellerId, Pageable pageable);
+
     @Query("SELECT t.seller.id FROM Transaction t " +
             "JOIN t.seller s " +
             "WHERE t.transactionDate BETWEEN :start AND :end " +
@@ -26,14 +24,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
             "ORDER BY SUM(t.amount) DESC LIMIT 1")
     Optional<Long> findTopSellerId(LocalDateTime start, LocalDateTime end);
 
-    /** Получает дату лучшего дня (максимум транзакций) для продавца. */
     @Query("SELECT CAST(t.transactionDate AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY CAST(t.transactionDate AS DATE) " +
             "ORDER BY COUNT(t.id) DESC LIMIT 1")
     Optional<LocalDate> findBestDay(Long sellerId);
 
-    /** Получает дату начала лучшей недели (максимум транзакций) для продавца. */
     @Query("SELECT CAST(FUNCTION('DATE_TRUNC', 'week', t.transactionDate) AS DATE) FROM Transaction t " +
             "WHERE t.seller.id = :sellerId " +
             "GROUP BY CAST(FUNCTION('DATE_TRUNC', 'week', t.transactionDate) AS DATE) " +

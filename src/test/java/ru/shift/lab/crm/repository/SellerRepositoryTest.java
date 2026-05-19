@@ -9,9 +9,11 @@ import ru.shift.lab.crm.entity.Seller;
 import ru.shift.lab.crm.entity.Transaction;
 import ru.shift.lab.crm.util.PaymentType;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -53,9 +55,9 @@ class SellerRepositoryTest {
         addTransaction(seller, BigDecimal.valueOf(500), START.plusDays(1));
         em.flush();
 
-        List<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD);
+        Page<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD, Pageable.unpaged());
 
-        assertThat(result).extracting(Seller::getName).containsExactly("Alice");
+        assertThat(result.getContent()).extracting(Seller::getName).containsExactly("Alice");
     }
 
     @Test
@@ -64,9 +66,9 @@ class SellerRepositoryTest {
         addTransaction(seller, BigDecimal.valueOf(2000), START.plusDays(1));
         em.flush();
 
-        List<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD);
+        Page<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD, Pageable.unpaged());
 
-        assertThat(result).isEmpty();
+        assertThat(result.getContent()).isEmpty();
     }
 
     @Test
@@ -74,9 +76,9 @@ class SellerRepositoryTest {
         persistSeller("Charlie");
         em.flush();
 
-        List<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD);
+        Page<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD, Pageable.unpaged());
 
-        assertThat(result).extracting(Seller::getName).containsExactly("Charlie");
+        assertThat(result.getContent()).extracting(Seller::getName).containsExactly("Charlie");
     }
 
     @Test
@@ -85,9 +87,9 @@ class SellerRepositoryTest {
         addTransaction(seller, THRESHOLD, START.plusDays(1));
         em.flush();
 
-        List<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD);
+        Page<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD, Pageable.unpaged());
 
-        assertThat(result).isEmpty();
+        assertThat(result.getContent()).isEmpty();
     }
 
     @Test
@@ -96,9 +98,9 @@ class SellerRepositoryTest {
         seller.setDeleted(true);
         em.flush();
 
-        List<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD);
+        Page<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD, Pageable.unpaged());
 
-        assertThat(result).isEmpty();
+        assertThat(result.getContent()).isEmpty();
     }
 
     @Test
@@ -107,9 +109,9 @@ class SellerRepositoryTest {
         addTransaction(seller, BigDecimal.valueOf(2000), LocalDateTime.of(2025, 12, 31, 23, 59));
         em.flush();
 
-        List<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD);
+        Page<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD, Pageable.unpaged());
 
-        assertThat(result).extracting(Seller::getName).containsExactly("Frank");
+        assertThat(result.getContent()).extracting(Seller::getName).containsExactly("Frank");
     }
 
     @Test
@@ -120,8 +122,8 @@ class SellerRepositoryTest {
         addTransaction(high, BigDecimal.valueOf(5000), START.plusDays(1));
         em.flush();
 
-        List<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD);
+        Page<Seller> result = sellerRepository.findUnderperformingSellers(START, END, THRESHOLD, Pageable.unpaged());
 
-        assertThat(result).extracting(Seller::getName).containsExactly("Low");
+        assertThat(result.getContent()).extracting(Seller::getName).containsExactly("Low");
     }
 }

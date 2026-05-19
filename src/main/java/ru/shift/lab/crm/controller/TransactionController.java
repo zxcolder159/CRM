@@ -13,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import jakarta.validation.Valid;
-import java.util.List;
 
 @Tag(name = "Transactions")
 @RestController
@@ -31,8 +30,8 @@ public class TransactionController {
 
     /** Получить все транзакции продавца по его ID. */
     @GetMapping("/seller/{sellerId}")
-    public List<TransactionDto> getTransactionsBySellerId(@PathVariable Long sellerId) {
-        return transactionService.getAllTransactionsBySellerId(sellerId);
+    public Page<TransactionDto> getTransactionsBySellerId(@PathVariable Long sellerId, Pageable pageable) {
+        return transactionService.getAllTransactionsBySellerId(sellerId, pageable);
     }
 
     /** Получить список всех транзакций. */

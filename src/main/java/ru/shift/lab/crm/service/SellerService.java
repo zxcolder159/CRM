@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
-import java.util.List;
 
 /** Сервис для Продавца. */
 @Service
@@ -43,13 +42,11 @@ public class SellerService {
     }
 
     /** Возвращает продавцов с суммой ниже порога за период. */
-    public List<SellerDto> getUnderperformingSellers(LocalDateTime startDate, PeriodType periodType, BigDecimal threshold) {
+    public Page<SellerDto> getUnderperformingSellers(LocalDateTime startDate, PeriodType periodType, BigDecimal threshold, Pageable pageable) {
         LocalDateTime normalizedStart = calculatePeriodStartDate(startDate, periodType);
         LocalDateTime endDate = calculatePeriodEndDate(startDate, periodType);
-        List<Seller> sellers = sellerRepository.findUnderperformingSellers(normalizedStart, endDate, threshold);
-        return sellers.stream()
-                .map(this::toDto)
-                .toList();
+        return sellerRepository.findUnderperformingSellers(normalizedStart, endDate, threshold, pageable)
+                .map(this::toDto);
     }
 
     /** Возвращает лучший период продаж продавца и проверяет его существование. */

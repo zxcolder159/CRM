@@ -217,29 +217,30 @@ class SellerControllerTest {
     }
 
     @Test
-    void getUnderperforming_returns200WithList() throws Exception {
-        when(sellerService.getUnderperformingSellers(any(), any(), any()))
-                .thenReturn(List.of(sellerDto(1L, "Alice")));
+    void getUnderperforming_returns200WithPage() throws Exception {
+        when(sellerService.getUnderperformingSellers(any(), any(), any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(sellerDto(1L, "Alice"))));
 
         mockMvc.perform(get("/api/sellers/underperforming")
                         .param("startDate", "2026-01-01T00:00:00")
                         .param("periodType", "MONTH")
                         .param("threshold", "1000"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("Alice"));
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Alice"));
     }
 
     @Test
-    void getUnderperforming_noResults_returns200WithEmptyList() throws Exception {
-        when(sellerService.getUnderperformingSellers(any(), any(), any())).thenReturn(List.of());
+    void getUnderperforming_noResults_returns200WithEmptyPage() throws Exception {
+        when(sellerService.getUnderperformingSellers(any(), any(), any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/api/sellers/underperforming")
                         .param("startDate", "2026-01-01T00:00:00")
                         .param("periodType", "YEAR")
                         .param("threshold", "500"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(0));
     }
 
     @Test

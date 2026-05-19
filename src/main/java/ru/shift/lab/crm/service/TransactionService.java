@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /** Сервис для работы с транзакциями. */
 @RequiredArgsConstructor
@@ -59,13 +58,12 @@ public class TransactionService {
     /**
      * Возвращает все транзакции продавца по его id.
      */
-    public List<TransactionDto> getAllTransactionsBySellerId(Long id) {
+    public Page<TransactionDto> getAllTransactionsBySellerId(Long id, Pageable pageable) {
         if (!sellerRepository.existsById(id)) {
             throw new ResourceNotFoundException("Продавец с id " + id + " не найден");
         }
-        return transactionRepository.findAllBySellerId(id).stream()
-                .map(this::toDto)
-                .toList();
+        return transactionRepository.findAllBySellerId(id, pageable)
+                .map(this::toDto);
     }
 
     /** Преобразует Entity в DTO. */

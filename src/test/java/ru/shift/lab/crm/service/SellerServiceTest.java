@@ -211,34 +211,39 @@ class SellerServiceTest {
     }
 
     @Test
-    void getUnderperformingSellers_returnsMappedList() {
-        when(sellerRepository.findUnderperformingSellers(any(), any(), any()))
-                .thenReturn(List.of(seller(1L, "Alice")));
+    void getUnderperformingSellers_returnsMappedPage() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(sellerRepository.findUnderperformingSellers(any(), any(), any(), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of(seller(1L, "Alice"))));
 
-        List<SellerDto> result = sellerService.getUnderperformingSellers(
-                LocalDateTime.of(2026, 1, 1, 0, 0), PeriodType.MONTH, BigDecimal.valueOf(1000));
+        Page<SellerDto> result = sellerService.getUnderperformingSellers(
+                LocalDateTime.of(2026, 1, 1, 0, 0), PeriodType.MONTH, BigDecimal.valueOf(1000), pageable);
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).name()).isEqualTo("Alice");
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).name()).isEqualTo("Alice");
     }
 
     @Test
-    void getUnderperformingSellers_noResults_returnsEmptyList() {
-        when(sellerRepository.findUnderperformingSellers(any(), any(), any())).thenReturn(List.of());
+    void getUnderperformingSellers_noResults_returnsEmptyPage() {
+        Pageable pageable = PageRequest.of(0, 20);
+        when(sellerRepository.findUnderperformingSellers(any(), any(), any(), eq(pageable)))
+                .thenReturn(new PageImpl<>(List.of()));
 
         assertThat(sellerService.getUnderperformingSellers(
-                LocalDateTime.of(2026, 1, 1, 0, 0), PeriodType.MONTH, BigDecimal.valueOf(1000))).isEmpty();
+                LocalDateTime.of(2026, 1, 1, 0, 0), PeriodType.MONTH, BigDecimal.valueOf(1000), pageable).getContent()).isEmpty();
     }
 
     @Test
     void getUnderperformingSellers_passesCorrectPeriodBoundariesToRepository() {
         LocalDateTime start = LocalDateTime.of(2026, 1, 1, 0, 0);
-        when(sellerRepository.findUnderperformingSellers(any(), any(), any())).thenReturn(List.of());
+        Pageable pageable = PageRequest.of(0, 20);
+        when(sellerRepository.findUnderperformingSellers(any(), any(), any(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
-        sellerService.getUnderperformingSellers(start, PeriodType.QUARTER, BigDecimal.valueOf(500));
+        sellerService.getUnderperformingSellers(start, PeriodType.QUARTER, BigDecimal.valueOf(500), pageable);
 
         ArgumentCaptor<LocalDateTime> endCaptor = ArgumentCaptor.forClass(LocalDateTime.class);
-        verify(sellerRepository).findUnderperformingSellers(eq(start), endCaptor.capture(), eq(BigDecimal.valueOf(500)));
+        verify(sellerRepository).findUnderperformingSellers(eq(start), endCaptor.capture(), eq(BigDecimal.valueOf(500)), any(Pageable.class));
         assertThat(endCaptor.getValue().toLocalDate()).isEqualTo(LocalDate.of(2026, 3, 31));
     }
 
