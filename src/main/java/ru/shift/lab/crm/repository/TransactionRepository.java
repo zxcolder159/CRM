@@ -2,6 +2,7 @@ package ru.shift.lab.crm.repository;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -15,6 +16,10 @@ import java.util.Optional;
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
     Page<Transaction> findAllBySellerId(Long sellerId, Pageable pageable);
+
+    @EntityGraph(attributePaths = "seller")
+    Page<Transaction> findAll(Pageable pageable);
+
 
     @Query("SELECT t.seller.id FROM Transaction t " +
             "JOIN t.seller s " +
