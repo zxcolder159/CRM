@@ -88,10 +88,15 @@ public class GlobalExceptionHandler {
     /** Обработка неожиданных ошибок (500). */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
-        ErrorResponseDto errorResponse = new ErrorResponseDto(
-                java.time.LocalDateTime.now(), "An unexpected error occurred: " + ex.getMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        return buildResponse("Произошла непредвиденная ошибка", HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
+     * Собирает тело ответа с текущим временем, переданным сообщением и HTTP-статусом.
+     */
+    private ResponseEntity<ErrorResponseDto> buildResponse(String message, HttpStatus status) {
+        ErrorResponseDto body = new ErrorResponseDto(java.time.LocalDateTime.now(), message, status.value());
+        return ResponseEntity.status(status).body(body);
     }
 }
 
