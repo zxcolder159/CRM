@@ -121,10 +121,10 @@ class TransactionControllerTest {
 
     private static Stream<Arguments> provideInvalidTransactionDtos() {
         return Stream.of(
-                Arguments.of(new CreateTransactionDto(1L, BigDecimal.valueOf(-100), PaymentType.CASH)), // negative amount
-                Arguments.of(new CreateTransactionDto(1L, BigDecimal.ZERO, PaymentType.CASH)),          // zero amount
-                Arguments.of(new CreateTransactionDto(null, BigDecimal.valueOf(100), PaymentType.CASH)),// null sellerId
-                Arguments.of(new CreateTransactionDto(1L, BigDecimal.valueOf(100), null))               // null paymentType
+                Arguments.of(new CreateTransactionDto(1L, BigDecimal.valueOf(-100), PaymentType.CASH)),
+                Arguments.of(new CreateTransactionDto(1L, BigDecimal.ZERO, PaymentType.CASH)),
+                Arguments.of(new CreateTransactionDto(null, BigDecimal.valueOf(100), PaymentType.CASH)),
+                Arguments.of(new CreateTransactionDto(1L, BigDecimal.valueOf(100), null))
         );
     }
 
