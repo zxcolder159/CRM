@@ -1,5 +1,6 @@
 package ru.shift.lab.crm.controller.advice;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +12,7 @@ import ru.shift.lab.crm.exception.ResourceNotFoundException;
 
 import jakarta.validation.ConstraintViolationException;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -88,6 +90,7 @@ public class GlobalExceptionHandler {
     /** Обработка неожиданных ошибок (500). */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
+        log.error("Непредвиденная ошибка", ex);
         return buildResponse("Произошла непредвиденная ошибка", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
