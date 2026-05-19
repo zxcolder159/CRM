@@ -166,29 +166,31 @@ class TransactionControllerTest {
     }
 
     @Test
-    void getTransactionsBySeller_found_returns200WithList() throws Exception {
-        when(transactionService.getAllTransactionsBySellerId(1L)).thenReturn(List.of(
-                transactionDto(1L, 1L, BigDecimal.valueOf(100), PaymentType.CASH)
-        ));
+    void getTransactionsBySeller_found_returns200WithPage() throws Exception {
+        when(transactionService.getAllTransactionsBySellerId(eq(1L), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(
+                        transactionDto(1L, 1L, BigDecimal.valueOf(100), PaymentType.CASH)
+                )));
 
         mockMvc.perform(get("/api/transactions/seller/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].sellerId").value(1));
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].sellerId").value(1));
     }
 
     @Test
-    void getTransactionsBySeller_sellerWithNoTransactions_returns200EmptyList() throws Exception {
-        when(transactionService.getAllTransactionsBySellerId(1L)).thenReturn(List.of());
+    void getTransactionsBySeller_sellerWithNoTransactions_returns200EmptyPage() throws Exception {
+        when(transactionService.getAllTransactionsBySellerId(eq(1L), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of()));
 
         mockMvc.perform(get("/api/transactions/seller/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(0));
+                .andExpect(jsonPath("$.content.length()").value(0));
     }
 
     @Test
     void getTransactionsBySeller_sellerNotFound_returns404() throws Exception {
-        when(transactionService.getAllTransactionsBySellerId(99L))
+        when(transactionService.getAllTransactionsBySellerId(eq(99L), any(Pageable.class)))
                 .thenThrow(new ResourceNotFoundException("Продавец с id 99 не найден"));
 
         mockMvc.perform(get("/api/transactions/seller/99"))

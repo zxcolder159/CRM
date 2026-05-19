@@ -22,7 +22,6 @@ import org.springframework.data.domain.Pageable;
 import jakarta.validation.Valid;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Tag(name = "Sellers")
 @RestController
@@ -49,11 +48,12 @@ public class SellerController {
     @Operation(summary = "Продавцы ниже порога",
             description = "Возвращает продавцов, чья сумма транзакций за период строго меньше threshold. Продавцы без транзакций включаются.")
     @GetMapping("/underperforming")
-    public List<SellerDto> getUnderperformingSellers(
+    public Page<SellerDto> getUnderperformingSellers(
             @Parameter(description = "Начало периода") @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
             @Parameter(description = "Длина периода: DAY, WEEK, MONTH, QUARTER, YEAR") @RequestParam PeriodType periodType,
-            @Parameter(description = "Порог суммы транзакций за период") @RequestParam BigDecimal threshold) {
-        return sellerService.getUnderperformingSellers(startDate, periodType, threshold);
+            @Parameter(description = "Порог суммы транзакций за период") @RequestParam BigDecimal threshold,
+            Pageable pageable) {
+        return sellerService.getUnderperformingSellers(startDate, periodType, threshold, pageable);
     }
 
     @Operation(summary = "Лучший период продаж продавца",
