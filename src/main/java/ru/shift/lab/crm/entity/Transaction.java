@@ -28,4 +28,16 @@ public class Transaction {
     private PaymentType paymentType;
 
     private LocalDateTime transactionDate;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Transaction other)) return false;
+        return id != null && id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

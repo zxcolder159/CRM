@@ -98,7 +98,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDto> handleGenericException(Exception ex) {
-        return buildResponse("Произошла непредвиденная ошибка: " + ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return buildResponse("Произошла непредвиденная ошибка", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     /**
